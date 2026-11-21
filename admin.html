@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - จัดการเว็บ Bio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #050505; color: #ffffff; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <!-- หน้าล็อกอิน -->
+    <div id="loginBox" class="max-w-sm mx-auto mt-20 bg-zinc-950 border border-zinc-800 p-6 rounded-2xl space-y-4">
+        <div class="text-center space-y-1">
+            <h1 class="text-xl font-bold text-blue-500">ADMIN PANEL</h1>
+            <p class="text-xs text-zinc-400">ใส่รหัสผ่านเพื่อเข้าจัดการหน้า Bio</p>
+        </div>
+        <input type="password" id="loginPass" placeholder="รหัสผ่านแอดมิน (ค่าเริ่มต้น: 1234)" 
+               onkeypress="if(event.key==='Enter') login()"
+               class="w-full bg-black border border-zinc-800 rounded-xl px-4 py-2.5 text-sm focus:border-blue-500 outline-none">
+        <button onclick="login()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium text-sm transition">
+            เข้าสู่ระบบ
+        </button>
+    </div>
+
+    <!-- หน้าจัดการข้อมูลหลัก -->
+    <div id="dashboard" class="hidden max-w-3xl mx-auto space-y-6">
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center gap-4 bg-zinc-950 border border-zinc-800 p-4 rounded-2xl">
+            <div>
+                <h1 class="text-lg font-bold flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> ระบบจัดการหน้า Bio
+                </h1>
+                <p class="text-xs text-zinc-400">ตั้งค่าธีมเทศกาล เอฟเฟกต์พื้นหลัง และลิงก์ทั้งหมด</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="/" target="_blank" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-eye"></i> ดูหน้าเว็บจริง
+                </a>
+                <button onclick="saveAll()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-blue-600/20">
+                    <i class="fa-solid fa-floppy-disk"></i> บันทึกการเปลี่ยนแปลง
+                </button>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 1: ธีมและเอฟเฟกต์พื้นหลัง -->
+        <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl space-y-4">
+            <h2 class="text-sm font-semibold text-blue-400 uppercase tracking-wider">1. ธีมเว็บ & เอฟเฟกต์พื้นหลัง</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">ธีมสีหน้าเว็บ (Theme)</label>
+                    <select id="inputTheme" onchange="autoMatchEffect()" class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-sm focus:border-blue-500 outline-none">
+                        <option value="dark">🌑 Black & Blue (Dark Mode)</option>
+                        <option value="light">☀️ Minimal White (Light Mode)</option>
+                        <option value="halloween">🎃 Halloween (ส้ม-ม่วง ลึกลับ)</option>
+                        <option value="christmas">🎄 Christmas (เขียว-แดง เทศกาล)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">เอฟเฟกต์พื้นหลัง (Background Effect)</label>
+                    <select id="inputEffect" class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2.5 text-sm focus:border-blue-500 outline-none">
+                        <option value="auto">✨ อัตโนมัติตามธีม (แนะนำ)</option>
+                        <option value="particles">🕸️ เส้นใยจุดแสง (Cyber Particles)</option>
+                        <option value="halloween">👻 ฟักทอง & ค้างคาวลอย (Halloween)</option>
+                        <option value="snow">❄️ หิมะตก (Christmas Snow)</option>
+                        <option value="none">🚫 ปิดเอฟเฟกต์พื้นหลัง</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 2: ข้อมูลโปรไฟล์ -->
+        <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl space-y-4">
+            <h2 class="text-sm font-semibold text-blue-400 uppercase tracking-wider">2. ข้อมูลโปรไฟล์</h2>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4 pb-2">
+                <img id="previewAvatar" src="" class="w-20 h-20 rounded-full object-cover border-2 border-blue-500">
+                <div class="flex-1 w-full space-y-2">
+                    <label class="block text-xs text-zinc-400">รูปโปรไฟล์ (อัปโหลดจากเครื่อง หรือวางลิงก์ URL)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="inputAvatar" onchange="document.getElementById('previewAvatar').src=this.value" class="flex-1 bg-black border border-zinc-800 rounded-lg px-3 py-2 text-xs">
+                        <label class="cursor-pointer px-3 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs whitespace-nowrap">
+                            <i class="fa-solid fa-upload mr-1"></i> อัปโหลดรูป
+                            <input type="file" accept="image/*" class="hidden" onchange="uploadImage(this)">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">ชื่อที่แสดง</label>
+                    <input type="text" id="inputName" class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">สถานะ (Badge)</label>
+                    <input type="text" id="inputStatus" class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-zinc-400 mb-1">คำแนะนำตัว (Bio)</label>
+                <input type="text" id="inputBio" class="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-sm">
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 3: โซเชียลมีเดีย -->
+        <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-semibold text-blue-400 uppercase tracking-wider">3. ไอคอนโซเชียลมีเดีย</h2>
+                <button onclick="addSocial()" class="text-xs bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg text-blue-400">
+                    + เพิ่มโซเชียล
+                </button>
+            </div>
+            <div id="socialsList" class="space-y-2"></div>
+        </div>
+
+        <!-- ส่วนที่ 4: ปุ่มลิงก์แนะนำ -->
+        <div class="bg-zinc-950 border border-zinc-800 p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-semibold text-blue-400 uppercase tracking-wider">4. ปุ่มลิงก์หลัก</h2>
+                <button onclick="addLink()" class="text-xs bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-lg text-blue-400">
+                    + เพิ่มปุ่มลิงก์
+                </button>
+            </div>
+            <div id="linksList" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <script>
+        let adminKey = '';
+        let bioData = {};
+
+        async function login() {
+            const pass = document.getElementById('loginPass').value;
+            if (!pass) return alert('กรุณาใส่รหัสผ่าน');
+            
+            const res = await fetch('/api/bio');
+            bioData = await res.json();
+
+            const check = await fetch('/api/bio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Admin-Key': pass },
+                body: JSON.stringify(bioData)
+            });
+
+            if (check.ok) {
+                adminKey = pass;
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                populateForm();
+            } else {
+                alert('รหัสผ่านไม่ถูกต้อง!');
+            }
+        }
+
+        function populateForm() {
+            document.getElementById('inputName').value = bioData.name || '';
+            document.getElementById('inputStatus').value = bioData.status || '';
+            document.getElementById('inputBio').value = bioData.bio || '';
+            document.getElementById('inputAvatar').value = bioData.avatar || '';
+            document.getElementById('previewAvatar').src = bioData.avatar || '';
+            document.getElementById('inputTheme').value = bioData.theme || 'dark';
+            document.getElementById('inputEffect').value = bioData.effect || 'auto';
+            renderSocials();
+            renderLinks();
+        }
+
+        function autoMatchEffect() {
+            const theme = document.getElementById('inputTheme').value;
+            const effectSelect = document.getElementById('inputEffect');
+            if (theme === 'halloween') effectSelect.value = 'halloween';
+            else if (theme === 'christmas') effectSelect.value = 'snow';
+            else effectSelect.value = 'particles';
+        }
+
+        function renderSocials() {
+            const platforms = ['discord', 'tiktok', 'instagram', 'facebook', 'youtube', 'line', 'github'];
+            document.getElementById('socialsList').innerHTML = (bioData.socials || []).map((s, i) => `
+                <div class="flex gap-2 items-center bg-black p-2.5 rounded-xl border border-zinc-800">
+                    <select onchange="bioData.socials[${i}].platform=this.value" class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs">
+                        ${platforms.map(p => `<option value="${p}" ${s.platform===p?'selected':''}>${p.toUpperCase()}</option>`).join('')}
+                    </select>
+                    <input type="text" value="${s.url}" onchange="bioData.socials[${i}].url=this.value" placeholder="ลิงก์ URL" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs">
+                    <button onclick="bioData.socials.splice(${i},1);renderSocials()" class="text-red-500 hover:text-red-400 px-2"><i class="fa-solid fa-trash text-xs"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function addSocial() {
+            bioData.socials.push({ platform: 'discord', url: 'https://' });
+            renderSocials();
+        }
+
+        function renderLinks() {
+            document.getElementById('linksList').innerHTML = (bioData.links || []).map((l, i) => `
+                <div class="flex flex-wrap sm:flex-nowrap gap-2 items-center bg-black p-2.5 rounded-xl border border-zinc-800">
+                    <input type="text" value="${l.title}" onchange="bioData.links[${i}].title=this.value" placeholder="ชื่อปุ่ม" class="w-full sm:w-1/3 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs">
+                    <input type="text" value="${l.url}" onchange="bioData.links[${i}].url=this.value" placeholder="ลิงก์ URL" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs">
+                    <label class="text-xs flex items-center gap-1.5 px-2 cursor-pointer select-none">
+                        <input type="checkbox" ${l.highlight?'checked':''} onchange="bioData.links[${i}].highlight=this.checked" class="accent-blue-500"> ปุ่มเด่น
+                    </label>
+                    <button onclick="bioData.links.splice(${i},1);renderLinks()" class="text-red-500 hover:text-red-400 px-2"><i class="fa-solid fa-trash text-xs"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function addLink() {
+            bioData.links.push({ title: 'ปุ่มใหม่', url: 'https://', highlight: false });
+            renderLinks();
+        }
+
+        async function uploadImage(input) {
+            if (!input.files || !input.files[0]) return;
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'X-Admin-Key': adminKey },
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('inputAvatar').value = data.url;
+                document.getElementById('previewAvatar').src = data.url;
+                alert('อัปโหลดรูปเรียบร้อย! อย่าลืมกดปุ่ม "บันทึกการเปลี่ยนแปลง"');
+            } else {
+                alert(data.message || 'อัปโหลดไม่สำเร็จ');
+            }
+        }
+
+        async function saveAll() {
+            bioData.name = document.getElementById('inputName').value;
+            bioData.status = document.getElementById('inputStatus').value;
+            bioData.bio = document.getElementById('inputBio').value;
+            bioData.avatar = document.getElementById('inputAvatar').value;
+            bioData.theme = document.getElementById('inputTheme').value;
+            bioData.effect = document.getElementById('inputEffect').value;
+
+            const res = await fetch('/api/bio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+                body: JSON.stringify(bioData)
+            });
+
+            if (res.ok) {
+                alert('บันทึกธีมและข้อมูลขึ้นหน้าเว็บหลักเรียบร้อย!');
+            } else {
+                alert('เกิดข้อผิดพลาดในการบันทึก');
+            }
+        }
+    </script>
+</body>
+</html>

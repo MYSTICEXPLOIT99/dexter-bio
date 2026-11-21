@@ -1,0 +1,30 @@
+{
+    "avatar": "/uploads/avatar_1795171775.jpg",
+    "bio": "Digital Creator & Developer | รับทำเว็บและบอท Discord",
+    "effect": "snow",
+    "links": [
+        {
+            "highlight": true,
+            "title": "เว็บไซต์ซื้อโปรแกรมโปร",
+            "url": "https://www.dexterstorez1.store/"
+        },
+        {
+            "highlight": false,
+            "title": "ติดต่อสอบถาม / สั่งงาน",
+            "url": "https://discord.gg/WQZVWAvFYG"
+        }
+    ],
+    "name": "DEXTER",
+    "socials": [
+        {
+            "platform": "discord",
+            "url": "https://discord.gg/WQZVWAvFYG"
+        },
+        {
+            "platform": "tiktok",
+            "url": "https://"
+        }
+    ],
+    "status": "ปิดรับชั่วคราว",
+    "theme": "dark"
+}
